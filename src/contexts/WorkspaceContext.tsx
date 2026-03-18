@@ -349,7 +349,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           .eq('workspace_id', id)
           .single()
           .then(({ data }) => setActiveMember(data))
-          .catch(err => console.error('Error setting active member:', err));
+          .then(undefined, err => console.error('Error setting active member:', err));
       }
     }
   }, [workspaces, user?.id]);
