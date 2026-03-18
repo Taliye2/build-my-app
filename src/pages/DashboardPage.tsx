@@ -1,173 +1,221 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
-import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Calendar, FileText, DollarSign, TrendingUp, Clock } from "lucide-react";
+import React, { useEffect, useState } from 'react';
+import { useWorkspace } from '@/contexts/WorkspaceContext';
+import { supabase } from '@/lib/supabase';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Users,
+  Calendar,
+  FileText,
+  TrendingUp,
+  AlertCircle,
+  Receipt,
+  Briefcase,
+} from 'lucide-react';
+import { format, subDays } from 'date-fns';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 
-interface DashboardStats {
-  totalClients: number;
-  activeClients: number;
-  upcomingEvents: number;
-  pendingInvoices: number;
-  totalRevenue: number;
-  recentServices: number;
-}
-
-function StatCard({
-  title,
-  value,
-  icon: Icon,
-  description,
-  accent,
-}: {
-  title: string;
-  value: string | number;
-  icon: React.ElementType;
-  description?: string;
-  accent?: string;
-}) {
-  return (
-    <Card className="border-border/40 shadow-sm hover:shadow-md transition-shadow">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground font-body">
-          {title}
-        </CardTitle>
-        <div className={`p-2 rounded-xl ${accent || "bg-primary/10"}`}>
-          <Icon className={`h-4 w-4 ${accent ? "text-current" : "text-primary"}`} />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold font-display">{value}</div>
-        {description && (
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-export default function DashboardPage() {
-  const { user } = useAuth();
-  const [stats, setStats] = useState<DashboardStats>({
-    totalClients: 0,
-    activeClients: 0,
-    upcomingEvents: 0,
-    pendingInvoices: 0,
-    totalRevenue: 0,
-    recentServices: 0,
+export const DashboardPage: React.FC = () => {
+  const { activeWorkspace } = useWorkspace();
+  const [stats, setStats] = useState({
+    clients: 0,
+    activeServices: 0,
+    pendingDocumentation: 0,
+    pendingApprovals: 0,
+    scheduledToday: 0
   });
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [recentEvents, setRecentEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchStats() {
+    const fetchData = async () => {
+      if (!activeWorkspace) return;
+      setLoading(true);
+      const today = new Date();
+      const todayStr = format(today, 'yyyy-MM-dd');
+
       try {
-        const [clientsRes, activeClientsRes, eventsRes, invoicesRes] = await Promise.all([
-          supabase.from("clients").select("id", { count: "exact", head: true }),
-          supabase.from("clients").select("id", { count: "exact", head: true }).eq("status", "ACTIVE"),
-          supabase.from("service_events").select("id", { count: "exact", head: true }).gte("date", new Date().toISOString().split("T")[0]),
-          supabase.from("invoices").select("id, subtotal", { count: "exact" }).eq("status", "DRAFT"),
+        const [clientsCount, servicesCount, approvalsCount, recentRes, scheduledRes, activityRes] = await Promise.all([
+          supabase.from('clients').select('*', { count: 'exact', head: true }).eq('workspace_id', activeWorkspace.id).eq('status', 'ACTIVE'),
+          supabase.from('service_events').select('*', { count: 'exact', head: true }).eq('workspace_id', activeWorkspace.id),
+          supabase.from('service_events').select('*', { count: 'exact', head: true }).eq('workspace_id', activeWorkspace.id).eq('status', 'SUBMITTED'),
+          supabase.from('service_events').select('*, clients(*), service_templates(*)').eq('workspace_id', activeWorkspace.id).order('created_at', { ascending: false }).limit(5),
+          supabase.from('service_events').select('*', { count: 'exact', head: true }).eq('workspace_id', activeWorkspace.id).eq('date', todayStr),
+          supabase.from('service_events').select('date').eq('workspace_id', activeWorkspace.id).gte('date', format(subDays(today, 6), 'yyyy-MM-dd')).lte('date', todayStr)
         ]);
 
-        const pendingTotal = invoicesRes.data?.reduce((sum, inv) => sum + (inv.subtotal || 0), 0) || 0;
-
         setStats({
-          totalClients: clientsRes.count || 0,
-          activeClients: activeClientsRes.count || 0,
-          upcomingEvents: eventsRes.count || 0,
-          pendingInvoices: invoicesRes.count || 0,
-          totalRevenue: pendingTotal,
-          recentServices: 0,
+          clients: clientsCount.count || 0,
+          activeServices: servicesCount.count || 0,
+          pendingDocumentation: 0,
+          pendingApprovals: approvalsCount.count || 0,
+          scheduledToday: scheduledRes.count || 0
         });
-      } catch (error) {
-        console.error("Error fetching dashboard stats:", error);
-      } finally {
-        setLoading(false);
+        setRecentEvents(recentRes.data || []);
+
+        const days = [];
+        for (let i = 6; i >= 0; i--) {
+          const d = subDays(today, i);
+          const dateStr = format(d, 'yyyy-MM-dd');
+          const count = activityRes.data?.filter((ev: any) => ev.date === dateStr).length || 0;
+          days.push({ name: format(d, 'EEE'), events: count });
+        }
+        setChartData(days);
+      } catch (err) {
+        console.error('Dashboard fetch error:', err);
       }
-    }
-
-    fetchStats();
-  }, []);
-
-  const greeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 17) return "Good afternoon";
-    return "Good evening";
-  };
+      setLoading(false);
+    };
+    fetchData();
+  }, [activeWorkspace]);
 
   return (
-    <DashboardLayout>
-      <div className="space-y-8 max-w-7xl">
+    <div className="animate-fade-in space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold font-display tracking-tight">
-            {greeting()} 👋
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Here's what's happening across your workspace today.
-          </p>
+          <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
+          <p className="text-sm text-muted-foreground mt-1">Operational command center for your workspace.</p>
         </div>
-
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <StatCard
-            title="Total Clients"
-            value={loading ? "—" : stats.totalClients}
-            icon={Users}
-            description={`${stats.activeClients} active`}
-          />
-          <StatCard
-            title="Upcoming Events"
-            value={loading ? "—" : stats.upcomingEvents}
-            icon={Calendar}
-            description="Scheduled sessions"
-            accent="bg-accent/10 text-accent"
-          />
-          <StatCard
-            title="Pending Invoices"
-            value={loading ? "—" : stats.pendingInvoices}
-            icon={FileText}
-            description="Awaiting payment"
-            accent="bg-warning/10 text-warning"
-          />
-          <StatCard
-            title="Draft Revenue"
-            value={loading ? "—" : `$${stats.totalRevenue.toLocaleString()}`}
-            icon={DollarSign}
-            description="From draft invoices"
-            accent="bg-success/10 text-success"
-          />
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card className="border-border/40">
-            <CardHeader>
-              <CardTitle className="text-lg font-display flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                Quick Actions
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                Navigate using the sidebar to manage clients, schedule services, handle documents, and process billing.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-border/40">
-            <CardHeader>
-              <CardTitle className="text-lg font-display flex items-center gap-2">
-                <Clock className="h-5 w-5 text-accent" />
-                Recent Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Activity feed will appear here as you and your team work across the platform.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        <Badge variant="outline" className="text-xs">
+          {new Date().toLocaleDateString()}
+        </Badge>
       </div>
-    </DashboardLayout>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="glass-card">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Clients</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{loading ? '...' : stats.clients}</div>
+            <p className="text-xs text-muted-foreground mt-1">{stats.clients === 0 ? 'Add your first client.' : 'Active and tracked'}</p>
+          </CardContent>
+        </Card>
+        <Card className="glass-card">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Services Delivered</CardTitle>
+            <Briefcase className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{loading ? '...' : stats.activeServices}</div>
+            <p className="text-xs text-muted-foreground mt-1">Total workspace lifetime</p>
+          </CardContent>
+        </Card>
+        <Card className="glass-card">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Documentation Due</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{loading ? '...' : stats.pendingDocumentation}</div>
+            <p className="text-xs text-muted-foreground mt-1">All documented.</p>
+          </CardContent>
+        </Card>
+        <Card className="glass-card">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pending Approvals</CardTitle>
+            <AlertCircle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{loading ? '...' : stats.pendingApprovals}</div>
+            <p className="text-xs text-muted-foreground mt-1">{stats.pendingApprovals > 0 ? 'Awaiting review.' : 'No pending approvals.'}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-7">
+        <Card className="glass-card lg:col-span-4">
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">Service Activity</CardTitle>
+            <CardDescription>Weekly service delivery volume.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {chartData.length === 0 || stats.activeServices === 0 ? (
+              <div className="flex flex-col items-center justify-center h-[200px] text-center">
+                <TrendingUp className="h-8 w-8 text-muted-foreground/40 mb-2" />
+                <p className="text-sm text-muted-foreground">No activity data yet</p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <AreaChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                  <XAxis dataKey="name" className="text-xs" />
+                  <YAxis className="text-xs" />
+                  <Tooltip />
+                  <Area type="monotone" dataKey="events" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.1)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card lg:col-span-3">
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">Today's Focus</CardTitle>
+            <CardDescription>Daily operational awareness.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Calendar className="h-4 w-4 text-primary" />
+              <div>
+                <p className="text-sm font-medium">Services Scheduled</p>
+                <p className="text-xs text-muted-foreground">{stats.scheduledToday} sessions today</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <FileText className="h-4 w-4 text-warning" />
+              <div>
+                <p className="text-sm font-medium">Documentation Due</p>
+                <p className="text-xs text-muted-foreground">{stats.pendingDocumentation} records pending</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Receipt className="h-4 w-4 text-brand-emerald" />
+              <div>
+                <p className="text-sm font-medium">Payroll Pending</p>
+                <p className="text-xs text-muted-foreground">Review approved records</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Recent Events</CardTitle>
+          <CardDescription>Latest entries across all clients.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {recentEvents.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">No recent events recorded.</p>
+          ) : (
+            <div className="space-y-3">
+              {recentEvents.map((event: any, i: number) => (
+                <div key={event.id} className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center justify-center h-6 w-6 rounded-full bg-primary/10 text-xs font-medium text-primary">{i + 1}</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{event.clients?.first_name} {event.clients?.last_name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{event.service_templates?.name || 'General Service'}</p>
+                  </div>
+                  <Badge variant="outline" className="text-xs">{event.status}</Badge>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
-}
+};
+
+export default DashboardPage;

@@ -5,7 +5,7 @@ import { WorkspaceProvider, useWorkspace } from '@/contexts/WorkspaceContext';
 import { AuthPage } from '@/pages/AuthPage';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { RequireRole } from '@/components/layout/RequireRole';
-import { DashboardPage } from '@/pages/DashboardPage';
+import DashboardPage from '@/pages/DashboardPage';
 import {
   ClientListPage,
   ClientProfilePage,
