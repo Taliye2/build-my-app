@@ -49,14 +49,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const checkSuperAdmin = async (userId: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      const authorizedEmails = ['taliye@kafiskey.com', 'admin@kafiskey.com', 'absame@lazimkey.com'];
-
-      if (user?.email && authorizedEmails.includes(user.email)) {
-        setIsSuperAdmin(true);
-        return;
-      }
-
       const { data, error } = await supabase
         .from('system_admins')
         .select('id')
