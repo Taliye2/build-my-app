@@ -193,6 +193,22 @@ export const AppLayout: React.FC = () => {
                 })}
               </SidebarMenu>
             </SidebarGroup>
+
+            {isSuperAdmin && (
+              <SidebarGroup>
+                <SidebarGroupLabel>Super Admin</SidebarGroupLabel>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={location.pathname.startsWith('/admin')}>
+                      <Link to="/admin">
+                        <Shield className="h-4 w-4" />
+                        <span>Admin Portal</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroup>
+            )}
           </SidebarContent>
 
           <SidebarFooter className="p-3">
