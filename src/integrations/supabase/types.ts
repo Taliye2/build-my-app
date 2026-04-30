@@ -621,8 +621,6 @@ export type Database = {
           phone: string | null
           preferred_contact_method: string | null
           preferred_name: string | null
-          saved_password: string | null
-          saved_username: string | null
           state: string | null
           status: Database["public"]["Enums"]["client_status"] | null
           street_address: string | null
@@ -655,8 +653,6 @@ export type Database = {
           phone?: string | null
           preferred_contact_method?: string | null
           preferred_name?: string | null
-          saved_password?: string | null
-          saved_username?: string | null
           state?: string | null
           status?: Database["public"]["Enums"]["client_status"] | null
           street_address?: string | null
@@ -689,8 +685,6 @@ export type Database = {
           phone?: string | null
           preferred_contact_method?: string | null
           preferred_name?: string | null
-          saved_password?: string | null
-          saved_username?: string | null
           state?: string | null
           status?: Database["public"]["Enums"]["client_status"] | null
           street_address?: string | null
@@ -2608,12 +2602,9 @@ export type Database = {
           mailing_state: string | null
           mailing_street_address: string | null
           mailing_zip_code: string | null
-          password_hash: string | null
           phone: string | null
           phone_number: string | null
           preferred_contact_method: string | null
-          saved_password: string | null
-          saved_username: string | null
           staff_id: string | null
           state: string | null
           street_address: string | null
@@ -2643,12 +2634,9 @@ export type Database = {
           mailing_state?: string | null
           mailing_street_address?: string | null
           mailing_zip_code?: string | null
-          password_hash?: string | null
           phone?: string | null
           phone_number?: string | null
           preferred_contact_method?: string | null
-          saved_password?: string | null
-          saved_username?: string | null
           staff_id?: string | null
           state?: string | null
           street_address?: string | null
@@ -2678,12 +2666,9 @@ export type Database = {
           mailing_state?: string | null
           mailing_street_address?: string | null
           mailing_zip_code?: string | null
-          password_hash?: string | null
           phone?: string | null
           phone_number?: string | null
           preferred_contact_method?: string | null
-          saved_password?: string | null
-          saved_username?: string | null
           staff_id?: string | null
           state?: string | null
           street_address?: string | null
