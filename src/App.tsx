@@ -4,8 +4,14 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { WorkspaceProvider, useWorkspace } from '@/contexts/WorkspaceContext';
 import { AuthPage } from '@/pages/AuthPage';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { AdminLayout } from '@/components/layout/AdminLayout';
 import { RequireRole } from '@/components/layout/RequireRole';
 import DashboardPage from '@/pages/DashboardPage';
+import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
+import AdminOrganizationsPage from '@/pages/admin/AdminOrganizationsPage';
+import AdminCampaignsPage from '@/pages/admin/AdminCampaignsPage';
+import AdminPaymentsPage from '@/pages/admin/AdminPaymentsPage';
+import AdminLeadsPage from '@/pages/admin/AdminLeadsPage';
 import {
   ClientListPage,
   ClientProfilePage,
@@ -113,6 +119,19 @@ function App() {
                 <Route path="/logout" element={<LogoutPage />} />
                 <Route path="/check-in/:slug" element={<CheckInPage />} />
                 <Route path="/quickbooks/callback" element={<QuickBooksCallbackPage />} />
+
+                {/* Admin routes */}
+                <Route element={
+                  <BootstrapGate>
+                    <AdminLayout />
+                  </BootstrapGate>
+                }>
+                  <Route path="/admin" element={<AdminDashboardPage />} />
+                  <Route path="/admin/organizations" element={<AdminOrganizationsPage />} />
+                  <Route path="/admin/campaigns" element={<AdminCampaignsPage />} />
+                  <Route path="/admin/payments" element={<AdminPaymentsPage />} />
+                  <Route path="/admin/leads" element={<AdminLeadsPage />} />
+                </Route>
 
                 {/* Onboarding */}
                 <Route path="/onboarding" element={
