@@ -24,7 +24,6 @@ export interface Workspace {
   email_sender_name: string | null;
   email_sender_address: string | null;
   email_reply_to: string | null;
-  resend_api_key: string | null;
   is_launchpad: boolean;
   hipaa_config?: {
     enabled: boolean;
