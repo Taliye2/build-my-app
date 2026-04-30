@@ -3011,6 +3011,7 @@ export type Database = {
       is_org_member:
         | { Args: { _tenant_id: string }; Returns: boolean }
         | { Args: { p_tenant_id: string; p_user_id: string }; Returns: boolean }
+      is_system_admin: { Args: never; Returns: boolean }
       sync_participant_tenant: {
         Args: { p_participant_id: string }
         Returns: undefined
