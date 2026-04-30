@@ -23,7 +23,8 @@ import {
   ChevronDown,
   AlertTriangle,
   Lock,
-  CheckCircle
+  CheckCircle,
+  Shield
 } from 'lucide-react';
 import {
   Sidebar,
@@ -95,6 +96,8 @@ export const AppLayout: React.FC = () => {
     { icon: Mail, label: 'Email Templates', path: '/email-templates', disabled: isPendingPayment, roles: ['OWNER', 'ADMIN', 'MANAGER'] },
     { icon: Settings, label: 'Settings', path: '/settings', disabled: isPendingPayment, roles: ['OWNER', 'ADMIN', 'MANAGER'] },
   ];
+
+  const { isSuperAdmin } = useAuth();
 
   const hasRoleAccess = (itemRoles?: string[]) => {
     if (!itemRoles || !activeMember) return true;
