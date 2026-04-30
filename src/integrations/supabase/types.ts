@@ -617,7 +617,6 @@ export type Database = {
           mailing_state: string | null
           mailing_street_address: string | null
           mailing_zip_code: string | null
-          password_hash: string | null
           phone: string | null
           preferred_contact_method: string | null
           preferred_name: string | null
@@ -649,7 +648,6 @@ export type Database = {
           mailing_state?: string | null
           mailing_street_address?: string | null
           mailing_zip_code?: string | null
-          password_hash?: string | null
           phone?: string | null
           preferred_contact_method?: string | null
           preferred_name?: string | null
@@ -681,7 +679,6 @@ export type Database = {
           mailing_state?: string | null
           mailing_street_address?: string | null
           mailing_zip_code?: string | null
-          password_hash?: string | null
           phone?: string | null
           preferred_contact_method?: string | null
           preferred_name?: string | null
@@ -2854,6 +2851,33 @@ export type Database = {
           },
         ]
       }
+      workspace_secrets: {
+        Row: {
+          created_at: string
+          id: string
+          secret_name: string
+          secret_value: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          secret_name: string
+          secret_value: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          secret_name?: string
+          secret_value?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       workspaces: {
         Row: {
           access_state: string | null
@@ -2874,7 +2898,6 @@ export type Database = {
           name: string
           plan_key: string | null
           plan_status: string | null
-          resend_api_key: string | null
           slug: string
           state: string | null
           stripe_customer_id: string | null
@@ -2903,7 +2926,6 @@ export type Database = {
           name: string
           plan_key?: string | null
           plan_status?: string | null
-          resend_api_key?: string | null
           slug: string
           state?: string | null
           stripe_customer_id?: string | null
@@ -2932,7 +2954,6 @@ export type Database = {
           name?: string
           plan_key?: string | null
           plan_status?: string | null
-          resend_api_key?: string | null
           slug?: string
           state?: string | null
           stripe_customer_id?: string | null
