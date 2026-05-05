@@ -23,6 +23,7 @@ export const AuthPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('login');
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [inviteToken, setInviteToken] = useState<string | null>(null);
+  const [invitePreview, setInvitePreview] = useState<{ workspace_name: string; email: string | null } | null>(null);
   const [verificationSent, setVerificationSent] = useState(false);
   const [sentToEmail, setSentToEmail] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -47,6 +48,21 @@ export const AuthPage: React.FC = () => {
       setActiveTab(tab);
     }
   }, [location.search]);
+
+  useEffect(() => {
+    if (!inviteToken) { setInvitePreview(null); return; }
+    (async () => {
+      const { data, error } = await supabase.rpc('get_invite_by_token', { _token: inviteToken });
+      if (error || !data || (Array.isArray(data) && data.length === 0)) {
+        toast.error('Invalid or expired invite link');
+        setInvitePreview(null);
+        return;
+      }
+      const row = Array.isArray(data) ? data[0] : data;
+      setInvitePreview({ workspace_name: row.workspace_name, email: row.email });
+      if (row.email) setRegisterEmail(row.email);
+    })();
+  }, [inviteToken]);
 
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -81,13 +97,26 @@ export const AuthPage: React.FC = () => {
 
   useEffect(() => {
     if (!authLoading && !workspaceLoading && session) {
+      if (inviteToken) {
+        (async () => {
+          const { error } = await supabase.rpc('accept_invite', { _token: inviteToken });
+          if (error) {
+            toast.error(error.message || 'Failed to accept invite');
+          } else {
+            toast.success('Welcome! Invite accepted.');
+          }
+          setInviteToken(null);
+          navigate('/', { replace: true });
+        })();
+        return;
+      }
       if (activeWorkspace) {
         navigate('/', { replace: true });
       } else {
         navigate('/onboarding', { replace: true });
       }
     }
-  }, [session, authLoading, workspaceLoading, activeWorkspace, navigate]);
+  }, [session, authLoading, workspaceLoading, activeWorkspace, navigate, inviteToken]);
 
   if (authLoading || (session && workspaceLoading)) {
     return (
