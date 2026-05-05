@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Clock, Users, Plus, MoreHorizontal, UserPlus } from 'lucide-react';
+import { Clock, Users, Plus, MoreHorizontal, UserPlus, User, Briefcase, Phone, Hourglass } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 
@@ -22,17 +22,24 @@ const STATUS_LABEL: Record<QueueStatus, string> = {
   WAITING: 'Waiting', IN_PROGRESS: 'In Progress', COMPLETED: 'Completed', CANCELLED: 'Cancelled', NO_SHOW: 'No Show',
 };
 const STATUS_STYLE: Record<QueueStatus, string> = {
-  WAITING: 'bg-warning/10 text-warning border-warning/30',
-  IN_PROGRESS: 'bg-primary/10 text-primary border-primary/30',
-  COMPLETED: 'bg-success/10 text-success border-success/30',
-  CANCELLED: 'bg-muted text-muted-foreground',
-  NO_SHOW: 'bg-destructive/10 text-destructive border-destructive/30',
+  WAITING: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30',
+  IN_PROGRESS: 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30',
+  COMPLETED: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30',
+  CANCELLED: 'bg-muted text-muted-foreground border border-border',
+  NO_SHOW: 'bg-destructive/15 text-destructive border border-destructive/30',
+};
+const STATUS_BAR: Record<QueueStatus, string> = {
+  WAITING: 'bg-amber-500',
+  IN_PROGRESS: 'bg-blue-500',
+  COMPLETED: 'bg-emerald-500',
+  CANCELLED: 'bg-muted-foreground/40',
+  NO_SHOW: 'bg-destructive',
 };
 const PRIORITY_STYLE: Record<Priority, string> = {
-  LOW: 'bg-muted text-muted-foreground',
-  NORMAL: 'bg-secondary text-secondary-foreground',
-  HIGH: 'bg-warning/15 text-warning border-warning/30',
-  URGENT: 'bg-destructive/15 text-destructive border-destructive/30',
+  LOW: 'bg-muted text-muted-foreground border border-border',
+  NORMAL: 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20',
+  HIGH: 'bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-500/30',
+  URGENT: 'bg-red-500/15 text-red-700 dark:text-red-300 border border-red-500/30',
 };
 
 const QueuePage: React.FC = () => {
