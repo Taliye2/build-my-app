@@ -1,0 +1,1 @@
+INSERT INTO public.system_admins (user_id) VALUES ('6bfc7108-2e5b-48b6-81ff-a08a069ab755') ON CONFLICT DO NOTHING;
