@@ -6,10 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { CreditCard, FileText, DollarSign, ArrowRight } from 'lucide-react';
+import { CreditCard, FileText, Sparkles, ArrowRight } from 'lucide-react';
 
 const BillingPage: React.FC = () => {
-  const { activeWorkspace, isTrialActive, trialDaysRemaining } = useWorkspace();
+  const { activeWorkspace } = useWorkspace();
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -19,31 +19,28 @@ const BillingPage: React.FC = () => {
       .then(({ data }) => { setInvoices(data || []); setLoading(false); });
   }, [activeWorkspace]);
 
-  const planStatus = activeWorkspace?.plan_status || 'none';
-  const planKey = activeWorkspace?.plan_key || 'community';
-
   if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><div className="animate-pulse text-muted-foreground">Loading billing...</div></div>;
 
   return (
     <div className="animate-fade-in space-y-6">
       <div className="flex items-center justify-between">
-        <div><h1 className="text-2xl font-semibold">Billing</h1><p className="text-sm text-muted-foreground mt-1">Manage your subscription and invoices</p></div>
-        <Button asChild><Link to="/billing/plan">Manage Plan <ArrowRight className="h-4 w-4 ml-1" /></Link></Button>
+        <div><h1 className="text-2xl font-semibold">Billing</h1><p className="text-sm text-muted-foreground mt-1">Client invoices and plan information</p></div>
+        <Button asChild variant="outline"><Link to="/billing/plan">View Plan <ArrowRight className="h-4 w-4 ml-1" /></Link></Button>
       </div>
 
       {/* Plan Status */}
       <div className="grid sm:grid-cols-3 gap-4">
         <Card><CardContent className="p-4 flex items-center gap-4">
-          <div className="p-3 rounded-lg bg-primary/10"><CreditCard className="h-6 w-6 text-primary" /></div>
-          <div><p className="text-xs text-muted-foreground">Current Plan</p><p className="text-lg font-bold capitalize">{planKey}</p></div>
+          <div className="p-3 rounded-lg bg-primary/10"><Sparkles className="h-6 w-6 text-primary" /></div>
+          <div><p className="text-xs text-muted-foreground">Current Plan</p><p className="text-lg font-bold">Free</p></div>
         </CardContent></Card>
         <Card><CardContent className="p-4 flex items-center gap-4">
-          <div className="p-3 rounded-lg bg-success/10"><DollarSign className="h-6 w-6 text-success" /></div>
-          <div><p className="text-xs text-muted-foreground">Status</p><Badge variant={planStatus === 'active' ? 'default' : 'secondary'} className={planStatus === 'active' ? 'bg-success/10 text-success' : ''}>{isTrialActive ? `Trial (${trialDaysRemaining}d left)` : planStatus}</Badge></div>
+          <div className="p-3 rounded-lg bg-success/10"><CreditCard className="h-6 w-6 text-success" /></div>
+          <div><p className="text-xs text-muted-foreground">Access</p><Badge className="bg-success/10 text-success">Full Access</Badge></div>
         </CardContent></Card>
         <Card><CardContent className="p-4 flex items-center gap-4">
           <div className="p-3 rounded-lg bg-muted"><FileText className="h-6 w-6 text-muted-foreground" /></div>
-          <div><p className="text-xs text-muted-foreground">Invoices</p><p className="text-lg font-bold">{invoices.length}</p></div>
+          <div><p className="text-xs text-muted-foreground">Client Invoices</p><p className="text-lg font-bold">{invoices.length}</p></div>
         </CardContent></Card>
       </div>
 

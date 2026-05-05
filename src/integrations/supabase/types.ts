@@ -1308,38 +1308,47 @@ export type Database = {
       invites: {
         Row: {
           created_at: string | null
+          created_by: string | null
           email: string | null
-          expires_at: string
+          expires_at: string | null
           full_name: string | null
           id: string
+          max_uses: number | null
           role: Database["public"]["Enums"]["workspace_role"]
           status: string | null
           token: string
           updated_at: string | null
+          uses_count: number
           workspace_id: string | null
         }
         Insert: {
           created_at?: string | null
+          created_by?: string | null
           email?: string | null
-          expires_at: string
+          expires_at?: string | null
           full_name?: string | null
           id?: string
+          max_uses?: number | null
           role?: Database["public"]["Enums"]["workspace_role"]
           status?: string | null
           token?: string
           updated_at?: string | null
+          uses_count?: number
           workspace_id?: string | null
         }
         Update: {
           created_at?: string | null
+          created_by?: string | null
           email?: string | null
-          expires_at?: string
+          expires_at?: string | null
           full_name?: string | null
           id?: string
+          max_uses?: number | null
           role?: Database["public"]["Enums"]["workspace_role"]
           status?: string | null
           token?: string
           updated_at?: string | null
+          uses_count?: number
           workspace_id?: string | null
         }
         Relationships: [
@@ -2970,6 +2979,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_invite: { Args: { _token: string }; Returns: string }
       cleanup_old_audit_logs: {
         Args: { retention_days?: number }
         Returns: number
@@ -2980,6 +2990,21 @@ export type Database = {
       }
       current_tenant_id: { Args: never; Returns: string }
       current_user_id: { Args: never; Returns: string }
+      get_invite_by_token: {
+        Args: { _token: string }
+        Returns: {
+          email: string
+          expires_at: string
+          full_name: string
+          id: string
+          max_uses: number
+          role: Database["public"]["Enums"]["workspace_role"]
+          status: string
+          uses_count: number
+          workspace_id: string
+          workspace_name: string
+        }[]
+      }
       get_provider_rate: {
         Args: {
           _as_of_date?: string

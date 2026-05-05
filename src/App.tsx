@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { WorkspaceProvider, useWorkspace } from '@/contexts/WorkspaceContext';
 import { AuthPage } from '@/pages/AuthPage';
@@ -75,18 +75,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 const WorkspaceRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { activeWorkspace } = useWorkspace();
-  const { isSuperAdmin } = useAuth();
-  const location = useLocation();
-
   if (!activeWorkspace) return <Navigate to="/onboarding" replace />;
-
-  const isPaid = isSuperAdmin || ['active', 'trialing', 'trial'].includes(activeWorkspace.plan_status || '');
-  const isBillingPlanPage = location.pathname === '/billing/plan';
-
-  if (!isPaid && !isBillingPlanPage) {
-    return <Navigate to="/billing/plan" replace />;
-  }
-
   return <>{children}</>;
 };
 
