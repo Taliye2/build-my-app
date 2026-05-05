@@ -307,6 +307,15 @@ export const AuthPage: React.FC = () => {
           <p className="text-sm text-muted-foreground">Universal Service Operations Platform</p>
         </div>
 
+        {invitePreview && (
+          <Card className="border-primary/40 bg-primary/5">
+            <CardContent className="pt-4 pb-4 text-center text-sm">
+              <p className="font-medium">You've been invited to join <span className="text-primary">{invitePreview.workspace_name}</span></p>
+              <p className="text-muted-foreground text-xs mt-1">Free Access — sign in or create your account to continue.</p>
+            </CardContent>
+          </Card>
+        )}
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">Login</TabsTrigger>
