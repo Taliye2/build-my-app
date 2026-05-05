@@ -21,8 +21,6 @@ import {
   Settings,
   LogOut,
   ChevronDown,
-  AlertTriangle,
-  Lock,
   CheckCircle,
   Shield
 } from 'lucide-react';
@@ -50,7 +48,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { BrandLogo } from '@/components/BrandLogo';
 
 const SidebarLogo: React.FC = () => {
