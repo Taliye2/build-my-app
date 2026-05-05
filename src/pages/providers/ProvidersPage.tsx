@@ -11,6 +11,16 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AddressFields, PhoneInput } from '@/components/forms/FormFields';
+import { STATUS_OPTIONS, isValidPhone } from '@/lib/formHelpers';
+
+const emptyProviderForm = {
+  first_name: '', last_name: '', title: '', email: '', phone: '',
+  street_address: '', city: '', state: '', zip_code: '', country: 'US',
+  status: 'Active', notes: '',
+};
 
 const ProvidersPage: React.FC = () => {
   const { activeWorkspace } = useWorkspace();
@@ -19,7 +29,7 @@ const ProvidersPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ first_name: '', last_name: '', title: '', email: '', phone: '' });
+  const [form, setForm] = useState({ ...emptyProviderForm });
 
   const load = async () => {
     if (!activeWorkspace) return;
@@ -31,10 +41,14 @@ const ProvidersPage: React.FC = () => {
 
   useEffect(() => { load(); }, [activeWorkspace]);
 
-  const handleCreate = async () => {
+  const handleCreate = async (addAnother = false) => {
     if (!activeWorkspace) return;
     if (!form.first_name.trim() && !form.last_name.trim()) {
       toast({ title: 'Name required', description: 'Enter first or last name.', variant: 'destructive' });
+      return;
+    }
+    if (!isValidPhone(form.phone)) {
+      toast({ title: 'Invalid phone', description: 'Use (XXX) XXX-XXXX format.', variant: 'destructive' });
       return;
     }
     setSaving(true);
@@ -47,7 +61,14 @@ const ProvidersPage: React.FC = () => {
       title: form.title || null,
       email: form.email || null,
       phone: form.phone || null,
-      active: true,
+      street_address: form.street_address || null,
+      city: form.city || null,
+      state: form.state || null,
+      zip_code: form.zip_code || null,
+      country: form.country || null,
+      notes: form.notes || null,
+      status: form.status,
+      active: form.status === 'Active',
     });
     setSaving(false);
     if (error) {
@@ -55,8 +76,8 @@ const ProvidersPage: React.FC = () => {
       return;
     }
     toast({ title: 'Provider added' });
-    setForm({ first_name: '', last_name: '', title: '', email: '', phone: '' });
-    setOpen(false);
+    setForm({ ...emptyProviderForm });
+    if (!addAnother) setOpen(false);
     load();
   };
 
@@ -116,33 +137,50 @@ const ProvidersPage: React.FC = () => {
         </CardContent>
       </Card>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Add Provider</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label>First name</Label>
+              <Label>First name *</Label>
               <Input value={form.first_name} onChange={e => setForm({ ...form, first_name: e.target.value })} />
             </div>
             <div className="space-y-1.5">
-              <Label>Last name</Label>
+              <Label>Last name *</Label>
               <Input value={form.last_name} onChange={e => setForm({ ...form, last_name: e.target.value })} />
             </div>
             <div className="space-y-1.5 col-span-2">
               <Label>Title</Label>
               <Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="e.g. Therapist" />
             </div>
-            <div className="space-y-1.5 col-span-2">
+            <div className="space-y-1.5">
               <Label>Email</Label>
               <Input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
             </div>
-            <div className="space-y-1.5 col-span-2">
+            <div className="space-y-1.5">
               <Label>Phone</Label>
-              <Input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
+              <PhoneInput value={form.phone} onChange={v => setForm({ ...form, phone: v })} />
+            </div>
+            <div className="col-span-2">
+              <AddressFields value={form} onChange={next => setForm({ ...form, ...next })} />
+            </div>
+            <div className="space-y-1.5 col-span-2">
+              <Label>Status</Label>
+              <Select value={form.status} onValueChange={v => setForm({ ...form, status: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {STATUS_OPTIONS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5 col-span-2">
+              <Label>Notes</Label>
+              <Textarea rows={3} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Credentials, specialties, internal notes..." />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>Cancel</Button>
-            <Button onClick={handleCreate} disabled={saving}>{saving ? 'Adding...' : 'Add Provider'}</Button>
+            <Button variant="outline" onClick={() => handleCreate(true)} disabled={saving}>Save & Add Another</Button>
+            <Button onClick={() => handleCreate(false)} disabled={saving}>{saving ? 'Adding...' : 'Add Provider'}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
