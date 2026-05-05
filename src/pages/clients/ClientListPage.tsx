@@ -7,11 +7,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Search, Users, UserPlus, Filter } from 'lucide-react';
 import { toast } from 'sonner';
+import { AddressFields, PhoneInput } from '@/components/forms/FormFields';
+import { isValidPhone } from '@/lib/formHelpers';
+
+const emptyClientForm = {
+  first_name: '', last_name: '', email: '', phone: '',
+  street_address: '', city: '', state: '', zip_code: '', country: 'US',
+  status: 'ACTIVE', notes: '',
+};
 
 interface Client {
   id: string;
@@ -31,7 +40,7 @@ const ClientListPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState({ first_name: '', last_name: '', email: '', phone: '' });
+  const [form, setForm] = useState({ ...emptyClientForm });
   const [submitting, setSubmitting] = useState(false);
 
   const fetchClients = async () => {
@@ -47,9 +56,13 @@ const ClientListPage: React.FC = () => {
 
   useEffect(() => { fetchClients(); }, [activeWorkspace]);
 
-  const handleCreate = async () => {
+  const handleCreate = async (addAnother = false) => {
     if (!form.first_name || !form.last_name) {
       toast.error('First and last name are required');
+      return;
+    }
+    if (!isValidPhone(form.phone)) {
+      toast.error('Phone must be (XXX) XXX-XXXX');
       return;
     }
     if (!activeWorkspace) return;
@@ -61,14 +74,13 @@ const ClientListPage: React.FC = () => {
     const { error } = await supabase.from('clients').insert({
       ...form,
       workspace_id: activeWorkspace.id,
-      status: 'ACTIVE',
     });
     if (error) {
       toast.error('Failed to add client');
     } else {
       toast.success('Client added successfully');
-      setForm({ first_name: '', last_name: '', email: '', phone: '' });
-      setDialogOpen(false);
+      setForm({ ...emptyClientForm });
+      if (!addAnother) setDialogOpen(false);
       fetchClients();
     }
     setSubmitting(false);
@@ -104,19 +116,38 @@ const ClientListPage: React.FC = () => {
               <UserPlus className="h-4 w-4 mr-2" /> Add Client
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>Add New Client</DialogTitle></DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div><Label>First Name *</Label><Input value={form.first_name} onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))} placeholder="John" /></div>
                 <div><Label>Last Name *</Label><Input value={form.last_name} onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))} placeholder="Doe" /></div>
               </div>
-              <div><Label>Email</Label><Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="john@example.com" /></div>
-              <div><Label>Phone</Label><Input type="tel" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="(555) 000-0000" /></div>
-              <Button onClick={handleCreate} className="w-full" disabled={submitting}>
-                {submitting ? 'Adding...' : 'Add Client'}
-              </Button>
+              <div className="grid grid-cols-2 gap-4">
+                <div><Label>Email</Label><Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="john@example.com" /></div>
+                <div><Label>Phone</Label><PhoneInput value={form.phone} onChange={v => setForm(f => ({ ...f, phone: v }))} /></div>
+              </div>
+              <AddressFields value={form} onChange={next => setForm(f => ({ ...f, ...next }))} />
+              <div>
+                <Label>Status</Label>
+                <Select value={form.status} onValueChange={v => setForm(f => ({ ...f, status: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ACTIVE">Active</SelectItem>
+                    <SelectItem value="INACTIVE">Inactive</SelectItem>
+                    <SelectItem value="DISCHARGED">Discharged</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Notes</Label>
+                <Textarea rows={3} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Additional context..." />
+              </div>
             </div>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => handleCreate(true)} disabled={submitting}>Save & Add Another</Button>
+              <Button onClick={() => handleCreate(false)} disabled={submitting}>{submitting ? 'Adding...' : 'Add Client'}</Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
