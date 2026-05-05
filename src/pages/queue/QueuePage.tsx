@@ -62,7 +62,7 @@ const QueuePage: React.FC = () => {
     const [evRes, qRes, cRes, sRes] = await Promise.all([
       supabase.from('service_events').select('*, clients(first_name, last_name), service_templates(name)')
         .eq('workspace_id', activeWorkspace.id).eq('date', today).order('start_time'),
-      supabase.from('queue_entries').select('*, clients(first_name, last_name)')
+      supabase.from('queue_entries').select('*')
         .eq('workspace_id', activeWorkspace.id).eq('queue_date', today).order('created_at'),
       supabase.from('clients').select('id, first_name, last_name, phone')
         .eq('workspace_id', activeWorkspace.id).order('first_name').limit(500),
@@ -70,7 +70,14 @@ const QueuePage: React.FC = () => {
         .eq('workspace_id', activeWorkspace.id).eq('status', 'active'),
     ]);
     setTodayEvents(evRes.data || []);
-    setQueue(qRes.data || []);
+    const rawQueue = qRes.data || [];
+    const clientIds = Array.from(new Set(rawQueue.map((q: any) => q.client_id).filter(Boolean)));
+    let clientMap: Record<string, any> = {};
+    if (clientIds.length) {
+      const { data: cs } = await supabase.from('clients').select('id, first_name, last_name').in('id', clientIds);
+      (cs || []).forEach((c: any) => { clientMap[c.id] = c; });
+    }
+    setQueue(rawQueue.map((q: any) => ({ ...q, clients: q.client_id ? clientMap[q.client_id] : null })));
     setClients(cRes.data || []);
     setStaff(sRes.data || []);
     setLoading(false);
@@ -138,8 +145,9 @@ const QueuePage: React.FC = () => {
 
   if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><div className="animate-pulse text-muted-foreground">Loading queue...</div></div>;
 
-  const activeQueue = queue.filter(q => q.status === 'WAITING' || q.status === 'IN_PROGRESS');
-  const resolvedQueue = queue.filter(q => q.status === 'COMPLETED' || q.status === 'CANCELLED' || q.status === 'NO_SHOW');
+  const norm = (s: string) => (s || '').toUpperCase();
+  const activeQueue = queue.filter(q => ['WAITING', 'IN_PROGRESS', 'IN_SERVICE'].includes(norm(q.status)));
+  const resolvedQueue = queue.filter(q => ['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(norm(q.status)));
 
   return (
     <div className="animate-fade-in space-y-6">
