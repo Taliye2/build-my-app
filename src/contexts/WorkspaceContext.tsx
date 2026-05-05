@@ -135,65 +135,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const hasAdvancedReporting = true;
 
   useEffect(() => {
-    if (!activeWorkspace) {
-      setIsLocked(false);
-      setTrialDaysRemaining(null);
-      return;
-    }
-
-    const checkLock = async () => {
-      if (activeWorkspace.plan_status === 'active' || activeWorkspace.access_state === 'ACTIVE_PAID' || isSuperAdmin) {
-        if (isLocked) setIsLocked(false);
-        setTrialDaysRemaining(null);
-        return;
-      }
-
-      const trialStartDate = activeWorkspace.trial_start_date ? new Date(activeWorkspace.trial_start_date) : null;
-      const trialEndsAt = activeWorkspace.trial_ends_at ? new Date(activeWorkspace.trial_ends_at) : null;
-      const now = new Date();
-
-      if (trialStartDate) {
-        const diffTime = now.getTime() - trialStartDate.getTime();
-        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-        const remaining = Math.max(0, 30 - diffDays);
-        setTrialDaysRemaining(remaining);
-
-        if (remaining <= 0 && activeWorkspace.plan_status !== 'active') {
-          if (activeWorkspace.access_state !== 'TRIAL_EXPIRED_LOCKED') {
-            await supabase
-              .from('workspaces')
-              .update({ access_state: 'TRIAL_EXPIRED_LOCKED' })
-              .eq('id', activeWorkspace.id);
-            setActiveWorkspace(prev => prev ? { ...prev, access_state: 'TRIAL_EXPIRED_LOCKED' } : null);
-          }
-          setIsLocked(true);
-        } else {
-          if (isLocked) setIsLocked(false);
-        }
-      } else if (trialEndsAt) {
-        const diffTime = trialEndsAt.getTime() - now.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        setTrialDaysRemaining(diffDays > 0 ? diffDays : 0);
-
-        if (now > trialEndsAt) {
-          if (activeWorkspace.access_state !== 'TRIAL_EXPIRED_LOCKED') {
-            await supabase
-              .from('workspaces')
-              .update({ access_state: 'TRIAL_EXPIRED_LOCKED' })
-              .eq('id', activeWorkspace.id);
-            setActiveWorkspace(prev => prev ? { ...prev, access_state: 'TRIAL_EXPIRED_LOCKED' } : null);
-          }
-          setIsLocked(true);
-        } else {
-          if (isLocked) setIsLocked(false);
-        }
-      } else {
-        setTrialDaysRemaining(null);
-        if (isLocked) setIsLocked(false);
-      }
-    };
-    checkLock();
-  }, [activeWorkspace, isLocked]);
+    setIsLocked(false);
+    setTrialDaysRemaining(null);
+  }, [activeWorkspace]);
 
   const activeWorkspaceIdRef = useRef<string | null>(
     localStorage.getItem('activeWorkspaceId')
