@@ -114,6 +114,14 @@ export const AdminLayout: React.FC = () => {
           <header className="h-14 flex items-center border-b border-border/50 px-4 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
             <SidebarTrigger className="mr-4" />
             <span className="text-xs font-medium text-destructive bg-destructive/10 px-2 py-1 rounded">ADMIN</span>
+            <div className="ml-auto">
+              <Button asChild size="sm" variant="outline" className="gap-2">
+                <Link to="/">
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Workspace
+                </Link>
+              </Button>
+            </div>
           </header>
           <main className="flex-1 p-6">
             <Outlet />
