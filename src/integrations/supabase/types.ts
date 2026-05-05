@@ -601,6 +601,7 @@ export type Database = {
           address: string | null
           case_number: string | null
           city: string | null
+          country: string | null
           created_at: string | null
           date_joined: string | null
           dob: string | null
@@ -617,6 +618,7 @@ export type Database = {
           mailing_state: string | null
           mailing_street_address: string | null
           mailing_zip_code: string | null
+          notes: string | null
           phone: string | null
           preferred_contact_method: string | null
           preferred_name: string | null
@@ -624,6 +626,7 @@ export type Database = {
           status: Database["public"]["Enums"]["client_status"] | null
           street_address: string | null
           tags: string[] | null
+          updated_at: string
           username: string | null
           workspace_id: string | null
           zip_code: string | null
@@ -632,6 +635,7 @@ export type Database = {
           address?: string | null
           case_number?: string | null
           city?: string | null
+          country?: string | null
           created_at?: string | null
           date_joined?: string | null
           dob?: string | null
@@ -648,6 +652,7 @@ export type Database = {
           mailing_state?: string | null
           mailing_street_address?: string | null
           mailing_zip_code?: string | null
+          notes?: string | null
           phone?: string | null
           preferred_contact_method?: string | null
           preferred_name?: string | null
@@ -655,6 +660,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["client_status"] | null
           street_address?: string | null
           tags?: string[] | null
+          updated_at?: string
           username?: string | null
           workspace_id?: string | null
           zip_code?: string | null
@@ -663,6 +669,7 @@ export type Database = {
           address?: string | null
           case_number?: string | null
           city?: string | null
+          country?: string | null
           created_at?: string | null
           date_joined?: string | null
           dob?: string | null
@@ -679,6 +686,7 @@ export type Database = {
           mailing_state?: string | null
           mailing_street_address?: string | null
           mailing_zip_code?: string | null
+          notes?: string | null
           phone?: string | null
           preferred_contact_method?: string | null
           preferred_name?: string | null
@@ -686,6 +694,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["client_status"] | null
           street_address?: string | null
           tags?: string[] | null
+          updated_at?: string
           username?: string | null
           workspace_id?: string | null
           zip_code?: string | null
@@ -704,7 +713,9 @@ export type Database = {
         Row: {
           active: boolean | null
           address: string | null
+          city: string | null
           client_id: string | null
+          country: string | null
           created_at: string | null
           dob: string | null
           email: string | null
@@ -716,16 +727,24 @@ export type Database = {
           language: string | null
           last_name: string
           metadata: Json | null
+          notes: string | null
           organization: string | null
           phone: string | null
           preferred_contact_method: string | null
           relationship: string | null
+          state: string | null
+          status: string
+          street_address: string | null
+          updated_at: string
           workspace_id: string
+          zip_code: string | null
         }
         Insert: {
           active?: boolean | null
           address?: string | null
+          city?: string | null
           client_id?: string | null
+          country?: string | null
           created_at?: string | null
           dob?: string | null
           email?: string | null
@@ -737,16 +756,24 @@ export type Database = {
           language?: string | null
           last_name: string
           metadata?: Json | null
+          notes?: string | null
           organization?: string | null
           phone?: string | null
           preferred_contact_method?: string | null
           relationship?: string | null
+          state?: string | null
+          status?: string
+          street_address?: string | null
+          updated_at?: string
           workspace_id: string
+          zip_code?: string | null
         }
         Update: {
           active?: boolean | null
           address?: string | null
+          city?: string | null
           client_id?: string | null
+          country?: string | null
           created_at?: string | null
           dob?: string | null
           email?: string | null
@@ -758,11 +785,17 @@ export type Database = {
           language?: string | null
           last_name?: string
           metadata?: Json | null
+          notes?: string | null
           organization?: string | null
           phone?: string | null
           preferred_contact_method?: string | null
           relationship?: string | null
+          state?: string | null
+          status?: string
+          street_address?: string | null
+          updated_at?: string
           workspace_id?: string
+          zip_code?: string | null
         }
         Relationships: [
           {
@@ -2622,6 +2655,7 @@ export type Database = {
           active: boolean | null
           address: string | null
           city: string | null
+          country: string | null
           created_at: string | null
           dob: string | null
           email: string | null
@@ -2638,13 +2672,16 @@ export type Database = {
           mailing_state: string | null
           mailing_street_address: string | null
           mailing_zip_code: string | null
+          notes: string | null
           phone: string | null
           phone_number: string | null
           preferred_contact_method: string | null
           staff_id: string | null
           state: string | null
+          status: string
           street_address: string | null
           title: string | null
+          updated_at: string
           user_id: string | null
           username: string | null
           workspace_id: string | null
@@ -2654,6 +2691,7 @@ export type Database = {
           active?: boolean | null
           address?: string | null
           city?: string | null
+          country?: string | null
           created_at?: string | null
           dob?: string | null
           email?: string | null
@@ -2670,13 +2708,16 @@ export type Database = {
           mailing_state?: string | null
           mailing_street_address?: string | null
           mailing_zip_code?: string | null
+          notes?: string | null
           phone?: string | null
           phone_number?: string | null
           preferred_contact_method?: string | null
           staff_id?: string | null
           state?: string | null
+          status?: string
           street_address?: string | null
           title?: string | null
+          updated_at?: string
           user_id?: string | null
           username?: string | null
           workspace_id?: string | null
@@ -2686,6 +2727,7 @@ export type Database = {
           active?: boolean | null
           address?: string | null
           city?: string | null
+          country?: string | null
           created_at?: string | null
           dob?: string | null
           email?: string | null
@@ -2702,13 +2744,16 @@ export type Database = {
           mailing_state?: string | null
           mailing_street_address?: string | null
           mailing_zip_code?: string | null
+          notes?: string | null
           phone?: string | null
           phone_number?: string | null
           preferred_contact_method?: string | null
           staff_id?: string | null
           state?: string | null
+          status?: string
           street_address?: string | null
           title?: string | null
+          updated_at?: string
           user_id?: string | null
           username?: string | null
           workspace_id?: string | null
