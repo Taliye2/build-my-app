@@ -49,7 +49,7 @@ export const LaunchpadPage: React.FC = () => (
         { title: 'Configure Services', desc: 'Set up service templates', link: '/services', done: false },
         { title: 'Organization Settings', desc: 'Complete your workspace profile', link: '/settings', done: false },
         { title: 'HIPAA Compliance', desc: 'Review and acknowledge requirements', link: '/compliance', done: false },
-        { title: 'Choose a Plan', desc: 'Select the right plan for your team', link: '/billing/plan', done: false },
+        { title: 'Invite Your Team', desc: 'Generate invite links for staff', link: '/team', done: false },
       ].map(item => (
         <Card key={item.title} className="hover:shadow-md transition-shadow">
           <CardContent className="p-4">
