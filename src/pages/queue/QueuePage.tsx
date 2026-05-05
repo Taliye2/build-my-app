@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Clock, Users, Plus, MoreHorizontal } from 'lucide-react';
+import { Clock, Users, Plus, MoreHorizontal, UserPlus } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 
@@ -52,7 +52,6 @@ const QueuePage: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [serviceNeeded, setServiceNeeded] = useState('');
   const [priority, setPriority] = useState<Priority>('NORMAL');
-  const [assignedStaff, setAssignedStaff] = useState<string>('');
   const [notes, setNotes] = useState('');
 
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -87,7 +86,7 @@ const QueuePage: React.FC = () => {
 
   const reset = () => {
     setMode('new'); setClientId(''); setName(''); setPhone('');
-    setServiceNeeded(''); setPriority('NORMAL'); setAssignedStaff(''); setNotes('');
+    setServiceNeeded(''); setPriority('NORMAL'); setNotes('');
   };
 
   const handleSubmit = async () => {
@@ -118,7 +117,8 @@ const QueuePage: React.FC = () => {
         service_needed: serviceNeeded.trim() || null,
         priority,
         notes: notes.trim() || null,
-        assigned_staff_user_id: assignedStaff || null,
+        assigned_staff_user_id: null,
+        assigned_at: null,
         is_walk_in: true,
         status: 'WAITING',
         queue_date: today,
@@ -142,6 +142,27 @@ const QueuePage: React.FC = () => {
     if (error) { toast({ title: 'Update failed', description: error.message, variant: 'destructive' }); return; }
     setQueue(q => q.map(e => e.id === id ? { ...e, status } : e));
   };
+
+  const assignStaff = async (id: string, staffUserId: string | null) => {
+    const payload: any = {
+      assigned_staff_user_id: staffUserId,
+      assigned_at: staffUserId ? new Date().toISOString() : null,
+    };
+    const { error } = await supabase.from('queue_entries').update(payload).eq('id', id);
+    if (error) { toast({ title: 'Assignment failed', description: error.message, variant: 'destructive' }); return; }
+    setQueue(q => q.map(e => e.id === id ? { ...e, ...payload } : e));
+    toast({ title: staffUserId ? 'Staff assigned' : 'Unassigned' });
+  };
+
+  const claimSelf = (id: string) => user && assignStaff(id, user.id);
+
+  const staffNameFor = (uid: string | null) => {
+    if (!uid) return null;
+    const s = staff.find(s => s.user_id === uid);
+    return s?.full_name || 'Member';
+  };
+
+  const fmtTime = (ts: string | null | undefined) => ts ? format(new Date(ts), 'h:mm a') : null;
 
   if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><div className="animate-pulse text-muted-foreground">Loading queue...</div></div>;
 
@@ -172,21 +193,39 @@ const QueuePage: React.FC = () => {
           </CardContent></Card>
         ) : activeQueue.map((e, i) => (
           <Card key={e.id}>
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary/10 text-primary font-bold text-sm">{i + 1}</div>
+            <CardContent className="p-4 flex items-start gap-4">
+              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary/10 text-primary font-bold text-sm shrink-0">{i + 1}</div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <p className="font-medium">{e.clients ? `${e.clients.first_name} ${e.clients.last_name}` : `${e.first_name} ${e.last_name}`}</p>
                   {e.is_walk_in && <Badge variant="outline" className="text-[10px] bg-accent/30">Walk-In</Badge>}
                   <Badge variant="outline" className={`text-[10px] ${PRIORITY_STYLE[e.priority as Priority]}`}>{e.priority}</Badge>
+                  <Badge className={`text-[10px] ${STATUS_STYLE[e.status as QueueStatus]}`}>{STATUS_LABEL[e.status as QueueStatus]}</Badge>
                 </div>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-xs text-muted-foreground mt-1">
                   {e.service_needed || 'General Service'}
                   {e.phone ? ` · ${e.phone}` : ''}
                 </p>
+                <div className="flex items-center gap-3 flex-wrap text-[11px] text-muted-foreground mt-1.5">
+                  <span>Added: {fmtTime(e.created_at) || '—'}</span>
+                  {e.assigned_staff_user_id ? (
+                    <span className="text-foreground/80">Assigned: <span className="font-medium">{staffNameFor(e.assigned_staff_user_id)}</span>{e.assigned_at ? ` · ${fmtTime(e.assigned_at)}` : ''}</span>
+                  ) : (
+                    <span className="italic">Unassigned</span>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Badge className={`text-xs ${STATUS_STYLE[e.status as QueueStatus]}`}>{STATUS_LABEL[e.status as QueueStatus]}</Badge>
+              <div className="flex items-center gap-1 shrink-0">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild><Button size="sm" variant="outline"><UserPlus className="h-3.5 w-3.5 mr-1" />{e.assigned_staff_user_id ? 'Reassign' : 'Assign'}</Button></DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="max-h-72 overflow-auto">
+                    {user && <DropdownMenuItem onClick={() => claimSelf(e.id)}>Claim (me)</DropdownMenuItem>}
+                    {staff.filter(s => s.user_id !== user?.id).map(s => (
+                      <DropdownMenuItem key={s.user_id} onClick={() => assignStaff(e.id, s.user_id)}>{s.full_name || 'Member'}</DropdownMenuItem>
+                    ))}
+                    {e.assigned_staff_user_id && <DropdownMenuItem onClick={() => assignStaff(e.id, null)} className="text-destructive">Unassign</DropdownMenuItem>}
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild><Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -275,15 +314,6 @@ const QueuePage: React.FC = () => {
                     <SelectItem value="NORMAL">Normal</SelectItem>
                     <SelectItem value="HIGH">High</SelectItem>
                     <SelectItem value="URGENT">Urgent</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Assigned Staff</Label>
-                <Select value={assignedStaff} onValueChange={setAssignedStaff}>
-                  <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
-                  <SelectContent>
-                    {staff.map(s => <SelectItem key={s.user_id} value={s.user_id}>{s.full_name || 'Member'}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>

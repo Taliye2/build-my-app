@@ -2128,6 +2128,7 @@ export type Database = {
       }
       queue_entries: {
         Row: {
+          assigned_at: string | null
           assigned_staff_user_id: string | null
           client_id: string | null
           created_at: string | null
@@ -2149,6 +2150,7 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
+          assigned_at?: string | null
           assigned_staff_user_id?: string | null
           client_id?: string | null
           created_at?: string | null
@@ -2170,6 +2172,7 @@ export type Database = {
           workspace_id: string
         }
         Update: {
+          assigned_at?: string | null
           assigned_staff_user_id?: string | null
           client_id?: string | null
           created_at?: string | null
