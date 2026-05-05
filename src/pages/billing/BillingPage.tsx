@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { CreditCard, FileText, DollarSign, Sparkles, ArrowRight } from 'lucide-react';
+import { CreditCard, FileText, Sparkles, ArrowRight } from 'lucide-react';
 
 const BillingPage: React.FC = () => {
   const { activeWorkspace } = useWorkspace();
