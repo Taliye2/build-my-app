@@ -11,7 +11,7 @@ const ProgramsPage: React.FC = () => {
           <Layers className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
           <h3 className="text-lg font-medium mb-2">Programs Module</h3>
           <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            Create and manage service programs, track enrollments, and organize clients into structured program cohorts. This feature is available on the Scale plan.
+            Create and manage service programs, track enrollments, and organize clients into structured program cohorts.
           </p>
         </CardContent>
       </Card>
