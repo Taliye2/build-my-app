@@ -21,8 +21,6 @@ import {
   Settings,
   LogOut,
   ChevronDown,
-  AlertTriangle,
-  Lock,
   CheckCircle,
   Shield
 } from 'lucide-react';
@@ -50,7 +48,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { BrandLogo } from '@/components/BrandLogo';
 
 const SidebarLogo: React.FC = () => {
@@ -66,35 +63,27 @@ const SidebarLogo: React.FC = () => {
 
 export const AppLayout: React.FC = () => {
   const { user, signOut, impersonatedWorkspaceId, setImpersonatedWorkspaceId } = useAuth();
-  const { workspaces, activeWorkspace, setActiveWorkspaceId, activeMember, isLocked, isTrialActive, trialDaysRemaining, hasBillingAccess, hasAdvancedReporting } = useWorkspace();
+  const { workspaces, activeWorkspace, setActiveWorkspaceId, activeMember } = useWorkspace();
   const location = useLocation();
-
-  const isPaid = activeWorkspace?.plan_status === 'active' || activeWorkspace?.access_state === 'ACTIVE_PAID';
-  const isPendingPayment = !isPaid && !isTrialActive;
-
-  const showBanner = (activeMember?.role === 'OWNER' || activeMember?.role === 'ADMIN') &&
-    !isPaid &&
-    isTrialActive &&
-    trialDaysRemaining !== null && trialDaysRemaining <= 7 && trialDaysRemaining >= 0;
 
   const showImpersonationBanner = !!impersonatedWorkspaceId;
 
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/', disabled: isPendingPayment },
-    { icon: Clock, label: 'Queue', path: '/queue', disabled: isPendingPayment, roles: ['OWNER', 'ADMIN', 'MANAGER'] },
-    { icon: Users, label: 'Clients', path: '/clients', disabled: isPendingPayment },
-    { icon: UserSquare2, label: 'Providers', path: '/providers', disabled: isPendingPayment, roles: ['OWNER', 'ADMIN', 'MANAGER'] },
-    { icon: Contact2, label: 'Contacts', path: '/contacts', disabled: isPendingPayment },
-    { icon: ShieldCheck, label: 'Compliance', path: '/compliance', disabled: isPendingPayment, roles: ['OWNER', 'ADMIN', 'MANAGER', 'READ_ONLY'] },
-    { icon: Briefcase, label: 'Services', path: '/services', disabled: isPendingPayment },
-    { icon: Layers, label: 'Programs', path: '/programs', disabled: isPendingPayment || !hasAdvancedReporting, roles: ['OWNER', 'ADMIN', 'MANAGER'], plan: 'Scale' },
-    { icon: Wallet, label: 'Payroll', path: '/payroll', disabled: isPendingPayment || !hasAdvancedReporting, roles: ['OWNER', 'ADMIN', 'MANAGER'], plan: 'Scale' },
-    { icon: CreditCard, label: 'Billing', path: '/billing', disabled: false },
-    { icon: BarChart3, label: 'Analytics', path: '/analytics', disabled: isPendingPayment || !hasAdvancedReporting, roles: ['OWNER', 'ADMIN', 'MANAGER'], plan: 'Scale' },
-    { icon: Users2, label: 'Team', path: '/team', disabled: isPendingPayment, roles: ['OWNER', 'ADMIN', 'MANAGER'] },
-    { icon: MessageSquare, label: 'Messaging', path: '/messaging', disabled: isPendingPayment },
-    { icon: Mail, label: 'Email Templates', path: '/email-templates', disabled: isPendingPayment, roles: ['OWNER', 'ADMIN', 'MANAGER'] },
-    { icon: Settings, label: 'Settings', path: '/settings', disabled: isPendingPayment, roles: ['OWNER', 'ADMIN', 'MANAGER'] },
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+    { icon: Clock, label: 'Queue', path: '/queue', roles: ['OWNER', 'ADMIN', 'MANAGER'] },
+    { icon: Users, label: 'Clients', path: '/clients' },
+    { icon: UserSquare2, label: 'Providers', path: '/providers', roles: ['OWNER', 'ADMIN', 'MANAGER'] },
+    { icon: Contact2, label: 'Contacts', path: '/contacts' },
+    { icon: ShieldCheck, label: 'Compliance', path: '/compliance', roles: ['OWNER', 'ADMIN', 'MANAGER', 'READ_ONLY'] },
+    { icon: Briefcase, label: 'Services', path: '/services' },
+    { icon: Layers, label: 'Programs', path: '/programs', roles: ['OWNER', 'ADMIN', 'MANAGER'] },
+    { icon: Wallet, label: 'Payroll', path: '/payroll', roles: ['OWNER', 'ADMIN', 'MANAGER'] },
+    { icon: CreditCard, label: 'Billing', path: '/billing' },
+    { icon: BarChart3, label: 'Analytics', path: '/analytics', roles: ['OWNER', 'ADMIN', 'MANAGER'] },
+    { icon: Users2, label: 'Team', path: '/team', roles: ['OWNER', 'ADMIN', 'MANAGER'] },
+    { icon: MessageSquare, label: 'Messaging', path: '/messaging' },
+    { icon: Mail, label: 'Email Templates', path: '/email-templates', roles: ['OWNER', 'ADMIN', 'MANAGER'] },
+    { icon: Settings, label: 'Settings', path: '/settings', roles: ['OWNER', 'ADMIN', 'MANAGER'] },
   ];
 
   const { isSuperAdmin } = useAuth();
@@ -161,10 +150,7 @@ export const AppLayout: React.FC = () => {
               <SidebarMenu>
                 {menuItems.map((item: any) => {
                   const roleAccess = hasRoleAccess(item.roles);
-                  const isScaleFeature = item.plan === 'Scale';
-                  const isTrialPreview = isTrialActive && isScaleFeature;
-                  const planRestricted = !isTrialPreview && item.plan && isScaleFeature && !hasAdvancedReporting;
-                  const isDisabled = item.disabled || planRestricted || !roleAccess;
+                  const isDisabled = !roleAccess;
                   const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
 
                   return (
@@ -173,18 +159,12 @@ export const AppLayout: React.FC = () => {
                         <SidebarMenuButton disabled className="opacity-50">
                           <item.icon className="h-4 w-4" />
                           <span>{item.label}</span>
-                          {planRestricted && <Lock className="h-3 w-3 ml-auto" />}
                         </SidebarMenuButton>
                       ) : (
                         <SidebarMenuButton asChild isActive={isActive}>
                           <Link to={item.path}>
                             <item.icon className="h-4 w-4" />
                             <span>{item.label}</span>
-                            {isTrialPreview && (
-                              <Badge variant="outline" className="ml-auto text-[10px] px-1 py-0">
-                                TRIAL
-                              </Badge>
-                            )}
                           </Link>
                         </SidebarMenuButton>
                       )}
@@ -263,40 +243,8 @@ export const AppLayout: React.FC = () => {
             <SidebarTrigger className="mr-4" />
           </header>
 
-          {showBanner && (
-            <div className="bg-warning/10 border-b border-warning/20 px-4 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm">
-                <AlertTriangle className="h-4 w-4 text-warning" />
-                <span>
-                  {trialDaysRemaining === 0
-                    ? "Your free trial ends today. Add payment to avoid interruption."
-                    : `Your free trial ends in ${trialDaysRemaining} ${trialDaysRemaining === 1 ? 'day' : 'days'}. Add payment to avoid interruption.`}
-                </span>
-              </div>
-              <Button asChild size="sm" variant="default">
-                <Link to="/billing/plan">Choose a plan</Link>
-              </Button>
-            </div>
-          )}
-
           <main className="flex-1 p-6">
-            {isLocked && !location.pathname.startsWith('/billing') && !location.pathname.startsWith('/logout') ? (
-              <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-                <Lock className="h-12 w-12 text-muted-foreground mb-4" />
-                <h2 className="text-xl font-semibold mb-2">Your trial has ended</h2>
-                <p className="text-muted-foreground mb-6">Choose a plan to continue using Kafiskey.</p>
-                <div className="flex gap-3">
-                  <Button asChild>
-                    <Link to="/billing/plan?interval=month">Choose Monthly</Link>
-                  </Button>
-                  <Button asChild variant="outline">
-                    <Link to="/billing/plan?interval=year">Choose Yearly</Link>
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <Outlet />
-            )}
+            <Outlet />
           </main>
         </div>
       </div>
