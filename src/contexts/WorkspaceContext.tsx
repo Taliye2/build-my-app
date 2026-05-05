@@ -96,12 +96,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     updateActivity();
   }, [activeWorkspace, impersonatedWorkspaceId]);
 
-  const isTrialActive = (!!activeWorkspace &&
-    (activeWorkspace.plan_status === 'trialing' ||
-      activeWorkspace.plan_status === 'trial' ||
-      activeWorkspace.access_state === 'TRIAL_ACTIVE') &&
-    !isLocked) || isSuperAdmin;
-
+  const isTrialActive = true;
   const isLaunchpad = activeWorkspace?.is_launchpad || false;
 
   const [clientCount, setClientCount] = useState(0);
@@ -133,17 +128,11 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     fetchCounts();
   }, [activeWorkspace]);
 
-  const planKey = isTrialActive ? 'scale' : (activeWorkspace?.plan_key || 'community');
-
-  const planLimits = {
-    maxClients: planKey === 'community' ? 3 : Infinity,
-    maxUsers: planKey === 'community' ? 1 : (planKey === 'growth' ? 10 : Infinity)
-  };
-
-  const canAddClient = clientCount < planLimits.maxClients;
-  const canAddUser = userCount < planLimits.maxUsers;
-  const hasBillingAccess = planKey !== 'community' || isTrialActive;
-  const hasAdvancedReporting = planKey === 'scale' || isTrialActive;
+  const planLimits = { maxClients: Infinity, maxUsers: Infinity };
+  const canAddClient = true;
+  const canAddUser = true;
+  const hasBillingAccess = true;
+  const hasAdvancedReporting = true;
 
   useEffect(() => {
     if (!activeWorkspace) {
