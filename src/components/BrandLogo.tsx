@@ -14,14 +14,14 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   className,
   isCollapsed = false
 }) => {
-  const LogoFull = ({ height = 36 }: { height?: number }) => (
+  const LogoFull = ({ height = 108 }: { height?: number }) => (
     <div className={cn("flex items-center", className)}>
       <img src={logoFull} alt="Kafiskey" style={{ height }} className="w-auto object-contain" />
     </div>
   );
 
   const LogoIcon = () => (
-    <img src={logoIcon} alt="Kafiskey" className={cn("w-9 h-9 object-contain", className)} />
+    <img src={logoIcon} alt="Kafiskey" className={cn("w-12 h-12 object-contain", className)} />
   );
 
   if (variant === 'icon' || (variant === 'sidebar' && isCollapsed)) {

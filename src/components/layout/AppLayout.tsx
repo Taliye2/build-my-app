@@ -101,7 +101,7 @@ export const AppLayout: React.FC = () => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <Sidebar collapsible="icon">
-          <SidebarHeader className="p-4" style={{ minHeight: '80px' }}>
+          <SidebarHeader className="p-4" style={{ minHeight: '140px' }}>
             <SidebarLogo />
           </SidebarHeader>
 
