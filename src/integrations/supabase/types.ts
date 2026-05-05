@@ -2128,39 +2128,66 @@ export type Database = {
       }
       queue_entries: {
         Row: {
+          assigned_staff_user_id: string | null
+          client_id: string | null
           created_at: string | null
           created_by_user_id: string | null
           first_name: string
           id: string
+          is_walk_in: boolean
           last_name: string
           location_tag: string | null
+          notes: string | null
           phone: string
+          priority: Database["public"]["Enums"]["queue_priority"]
+          queue_date: string
+          service_needed: string | null
+          service_template_id: string | null
           source: string | null
           status: string | null
+          updated_at: string
           workspace_id: string
         }
         Insert: {
+          assigned_staff_user_id?: string | null
+          client_id?: string | null
           created_at?: string | null
           created_by_user_id?: string | null
           first_name: string
           id?: string
+          is_walk_in?: boolean
           last_name: string
           location_tag?: string | null
+          notes?: string | null
           phone: string
+          priority?: Database["public"]["Enums"]["queue_priority"]
+          queue_date?: string
+          service_needed?: string | null
+          service_template_id?: string | null
           source?: string | null
           status?: string | null
+          updated_at?: string
           workspace_id: string
         }
         Update: {
+          assigned_staff_user_id?: string | null
+          client_id?: string | null
           created_at?: string | null
           created_by_user_id?: string | null
           first_name?: string
           id?: string
+          is_walk_in?: boolean
           last_name?: string
           location_tag?: string | null
+          notes?: string | null
           phone?: string
+          priority?: Database["public"]["Enums"]["queue_priority"]
+          queue_date?: string
+          service_needed?: string | null
+          service_template_id?: string | null
           source?: string | null
           status?: string | null
+          updated_at?: string
           workspace_id?: string
         }
         Relationships: [
@@ -3081,6 +3108,7 @@ export type Database = {
       pay_period_type: "weekly" | "biweekly" | "semi_monthly" | "monthly"
       payroll_run_status: "draft" | "approved" | "synced" | "paid"
       person_type: "recipient" | "provider" | "student" | "staff" | "other"
+      queue_priority: "LOW" | "NORMAL" | "HIGH" | "URGENT"
       service_event_status:
         | "draft"
         | "submitted"
@@ -3255,6 +3283,7 @@ export const Constants = {
       pay_period_type: ["weekly", "biweekly", "semi_monthly", "monthly"],
       payroll_run_status: ["draft", "approved", "synced", "paid"],
       person_type: ["recipient", "provider", "student", "staff", "other"],
+      queue_priority: ["LOW", "NORMAL", "HIGH", "URGENT"],
       service_event_status: [
         "draft",
         "submitted",
