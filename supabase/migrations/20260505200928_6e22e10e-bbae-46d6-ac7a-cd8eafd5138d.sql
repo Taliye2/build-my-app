@@ -1,0 +1,1 @@
+ALTER TABLE public.queue_entries ADD COLUMN IF NOT EXISTS assigned_at TIMESTAMPTZ;
