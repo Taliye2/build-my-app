@@ -241,6 +241,16 @@ export const AppLayout: React.FC = () => {
 
           <header className="h-14 flex items-center border-b border-border/50 px-4 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
             <SidebarTrigger className="mr-4" />
+            {isSuperAdmin && (
+              <div className="ml-auto">
+                <Button asChild size="sm" variant="outline" className="gap-2">
+                  <Link to="/admin">
+                    <Shield className="h-4 w-4" />
+                    Switch to Super Admin
+                  </Link>
+                </Button>
+              </div>
+            )}
           </header>
 
           <main className="flex-1 p-6">
