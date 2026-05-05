@@ -1,5 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import logoFull from '@/assets/kafiskey-logo.png';
+import logoIcon from '@/assets/kafiskey-icon.png';
 
 interface BrandLogoProps {
   variant?: 'sidebar' | 'navbar' | 'auth' | 'icon';
@@ -12,23 +14,14 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   className,
   isCollapsed = false
 }) => {
-  // SVG-based logo that doesn't depend on external files
-  const LogoFull = ({ height = 40 }: { height?: number }) => (
-    <div className={cn("flex items-center gap-2", className)}>
-      <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-brand-gradient">
-        <span className="text-white font-bold text-lg">K</span>
-      </div>
-      <div className="flex flex-col">
-        <span className="font-bold text-sm tracking-tight text-foreground">Kafiskey</span>
-        <span className="text-[10px] text-muted-foreground -mt-0.5">Service Operations</span>
-      </div>
+  const LogoFull = ({ height = 36 }: { height?: number }) => (
+    <div className={cn("flex items-center", className)}>
+      <img src={logoFull} alt="Kafiskey" style={{ height }} className="w-auto object-contain" />
     </div>
   );
 
   const LogoIcon = () => (
-    <div className={cn("flex items-center justify-center w-9 h-9 rounded-xl bg-brand-gradient", className)}>
-      <span className="text-white font-bold text-lg">K</span>
-    </div>
+    <img src={logoIcon} alt="Kafiskey" className={cn("w-9 h-9 object-contain", className)} />
   );
 
   if (variant === 'icon' || (variant === 'sidebar' && isCollapsed)) {
@@ -36,7 +29,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   }
 
   if (variant === 'auth') {
-    return <LogoFull height={80} />;
+    return <LogoFull height={64} />;
   }
 
   return <LogoFull />;
