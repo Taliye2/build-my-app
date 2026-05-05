@@ -75,18 +75,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 const WorkspaceRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { activeWorkspace } = useWorkspace();
-  const { isSuperAdmin } = useAuth();
-  const location = useLocation();
-
   if (!activeWorkspace) return <Navigate to="/onboarding" replace />;
-
-  const isPaid = isSuperAdmin || ['active', 'trialing', 'trial'].includes(activeWorkspace.plan_status || '');
-  const isBillingPlanPage = location.pathname === '/billing/plan';
-
-  if (!isPaid && !isBillingPlanPage) {
-    return <Navigate to="/billing/plan" replace />;
-  }
-
   return <>{children}</>;
 };
 
