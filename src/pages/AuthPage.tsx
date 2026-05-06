@@ -222,7 +222,29 @@ export const AuthPage: React.FC = () => {
     });
 
     if (error) {
-      toast.error(error.message);
+      const msg = error.message?.toLowerCase() || '';
+      if (msg.includes('email not confirmed') || msg.includes('not confirmed')) {
+        toast.error('Please confirm your email before signing in. We can resend the verification link.');
+        setSentToEmail(loginEmail);
+        setVerificationSent(true);
+      } else if (msg.includes('invalid login credentials') || msg.includes('invalid_credentials')) {
+        // Check if the account exists but email is unconfirmed
+        const { error: resendError } = await supabase.auth.resend({
+          type: 'signup',
+          email: loginEmail,
+          options: { emailRedirectTo: `${window.location.origin}/auth` },
+        });
+        if (!resendError) {
+          toast.error('Your email is not confirmed yet. We just resent the verification link.');
+          setSentToEmail(loginEmail);
+          setResendCooldown(30);
+          setVerificationSent(true);
+        } else {
+          toast.error('Invalid email or password. If you just registered, check your inbox to confirm your email first.');
+        }
+      } else {
+        toast.error(error.message);
+      }
       setLoading(false);
     } else {
       if (data.user) {
