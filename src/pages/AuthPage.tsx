@@ -290,6 +290,71 @@ export const AuthPage: React.FC = () => {
     setLoading(false);
   };
 
+  const handleOAuthSignIn = async (provider: OAuthProvider) => {
+    setLoading(true);
+    const redirectTo = inviteToken
+      ? `${window.location.origin}/auth?invite=${inviteToken}`
+      : `${window.location.origin}/auth`;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo,
+        queryParams: provider === 'google' ? { prompt: 'select_account' } : undefined,
+      },
+    });
+    if (error) {
+      const msg = error.message?.toLowerCase() || '';
+      if (msg.includes('provider is not enabled') || msg.includes('not enabled')) {
+        toast.error(`${provider === 'google' ? 'Google' : 'Microsoft'} sign-in isn't enabled yet. Please use email and password, or contact support.`);
+      } else {
+        toast.error(`Couldn't sign in with ${provider === 'google' ? 'Google' : 'Microsoft'}. Please try again.`);
+      }
+      setLoading(false);
+    }
+  };
+
+  const SocialAuthSection: React.FC<{ mode: 'login' | 'register' }> = ({ mode }) => (
+    <div className="space-y-3">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full h-11"
+          onClick={() => handleOAuthSignIn('google')}
+          disabled={loading}
+          aria-label="Continue with Google"
+        >
+          <GoogleIcon />
+          <span className="ml-2">Continue with Google</span>
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full h-11"
+          onClick={() => handleOAuthSignIn('azure')}
+          disabled={loading}
+          aria-label="Continue with Microsoft"
+        >
+          <MicrosoftIcon />
+          <span className="ml-2">Continue with Microsoft</span>
+        </Button>
+      </div>
+      <p className="text-center text-xs text-muted-foreground">
+        {mode === 'register'
+          ? 'Fastest way to get started — no password needed.'
+          : 'Use your school or work account.'}
+      </p>
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-border" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-card px-2 text-muted-foreground">or {mode === 'register' ? 'sign up' : 'continue'} with email</span>
+        </div>
+      </div>
+    </div>
+  );
+
   if (verificationSent) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
