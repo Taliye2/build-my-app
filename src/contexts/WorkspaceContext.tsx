@@ -157,7 +157,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       return;
     }
 
-    if (impersonatedWorkspaceId) {
+    if (impersonatedWorkspaceId && isSuperAdmin) {
       const { data: ws, error } = await supabase
         .from('workspaces')
         .select('*')
