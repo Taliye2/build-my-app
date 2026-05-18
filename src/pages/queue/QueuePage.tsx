@@ -344,6 +344,18 @@ const QueuePage: React.FC = () => {
               <CardContent className="p-3 flex items-center gap-4 text-sm">
                 <span className="flex-1 truncate">{e.clients ? `${e.clients.first_name} ${e.clients.last_name}` : `${e.first_name} ${e.last_name}`} · {e.service_needed || 'General'}</span>
                 <Badge className={`text-xs ${STATUS_STYLE[e.status as QueueStatus]}`}>{STATUS_LABEL[e.status as QueueStatus]}</Badge>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="sm" variant="outline" className="h-7">Reopen</Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => updateStatus(e.id, 'WAITING')}>Move to Waiting</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => updateStatus(e.id, 'IN_PROGRESS')}>Mark In Progress</DropdownMenuItem>
+                    {(['COMPLETED','CANCELLED','NO_SHOW'] as QueueStatus[]).filter(s => s !== (e.status as QueueStatus)).map(s => (
+                      <DropdownMenuItem key={s} onClick={() => updateStatus(e.id, s)}>Mark {STATUS_LABEL[s]}</DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </CardContent>
             </Card>
           ))}
